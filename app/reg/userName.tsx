@@ -4,25 +4,36 @@ import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function UserInfoScreen() {
   const navigation = useNavigation();
-    const router = useRouter();
-     useEffect(() => {
-        navigation.setOptions({
-          headerShown: false,
-        });
-      }, [navigation]);
+  const router = useRouter();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!firstName.trim() || !lastName.trim()) {
       Alert.alert("Invalid Name", "Please enter both first and last names.");
       return;
     }
-    router.push("./email");; // Navigate to the next screen
+
+    try {
+      // Store the first and last names in AsyncStorage
+      await AsyncStorage.setItem("firstName", firstName);
+      await AsyncStorage.setItem("lastName", lastName);
+
+      router.push("./email"); // Navigate to the next screen
+    } catch (error) {
+      console.error("Error saving names:", error);
+    }
   };
 
   return (
@@ -66,7 +77,7 @@ export default function UserInfoScreen() {
             !firstName.trim() || !lastName.trim() ? "bg-[#4B5320]" : "bg-[#4B5320]"
           } font-Montserrat`}
           onPress={handleNext}
-          disabled={!firstName.trim() || !lastName.trim()}
+          disabled={!firstName.trim() || !lastName.trim()} // Disable button if any name is empty
         >
           <Text className="text-white font-bold font-Montserrat">Next</Text>
         </TouchableOpacity>

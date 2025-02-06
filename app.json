@@ -40,6 +40,20 @@
     },
     "router": {
       "headerShown": false
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2763f1f3-1f6d-4263-b017-c40c84eabb2c"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2763f1f3-1f6d-4263-b017-c40c84eabb2c"
     }
   }
 }

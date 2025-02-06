@@ -4,6 +4,7 @@ import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function PasswordScreen() {
   const navigation = useNavigation();
@@ -19,18 +20,85 @@ export default function PasswordScreen() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (password !== confirmPassword) {
       setPasswordError("Passwords do not match");
       return;
     }
-    setPasswordError(""); // Clear error if passwords match
-    router.push("./addVehicle"); // Navigate to the next screen
+    setPasswordError("");
+
+    try {
+      const firstName = await AsyncStorage.getItem("firstName");
+      const lastName = await AsyncStorage.getItem("lastName");
+      const gender = await AsyncStorage.getItem("gender");
+      const email = await AsyncStorage.getItem("email");
+      const date = await AsyncStorage.getItem("selectDOB"); 
+      const phoneNumber = await AsyncStorage.getItem("userPhoneNumber");
+      const license = await AsyncStorage.getItem("licenseNumber");
+      const otp = await AsyncStorage.getItem("otp");
+      const userToken = await AsyncStorage.getItem("user_token");
+
+      const formattedDob = new Date(date).toISOString().split('T')[0];
+
+      const requestData = {
+        user_token: userToken,
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,  
+        email: email,
+        password: password,
+        gender: gender,
+        profile_picture: "http://example.com/profile.jpg",
+        date_of_birth: formattedDob,
+        address: "123 Street Name, City, Country",
+        licence_number: license,
+        id_proof: "http://example.com/id_proof.jpg",
+        id_proof_status: "verified",
+        rejected_reason: "Some rejection reason",
+        online_status: "online",
+        wallet: 200.50,
+        zone: "Zone A",
+        overall_ratings: 4.7,
+        no_of_ratings: 150,
+        otp: otp,
+        status: "active",
+        referral_code: "DRIVER123",
+        refered_by: "referral_user_token"
+      };
+
+      console.log("Request Data:", requestData);  
+
+      const response = await fetch(
+        "https://billgold.ng/casa/API/driver_details.php?action=update_driver_details",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      const result = await response.json();
+      console.log(result)
+      if (result.status === "success") {  
+
+        Alert.alert( "updated", "Your profile is updated");
+        setTimeout(()=>{
+          router.push("./addVehicle");
+        }, 3000)
+        
+      } else {
+        Alert.alert("Error", "Failed to update details. Please try again.");
+      }
+    } catch (error) {
+      console.log("Error retrieving data from AsyncStorage or sending to API:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
   };
 
   return (
     <SafeAreaView className="flex-1 items-center bg-white">
-      {/* Back Icon */}
       <TouchableOpacity
         onPress={() => navigation.goBack()}
         className="absolute top-6 left-4 mt-4"
@@ -46,7 +114,6 @@ export default function PasswordScreen() {
           You need to enter and confirm your password
         </Text>
 
-        {/* Password Input */}
         <View className="my-9 py-3 relative flex-row items-center border border-gray-300 rounded-lg px-4">
           <Entypo
             name="eye-with-line"
@@ -63,7 +130,6 @@ export default function PasswordScreen() {
           />
         </View>
 
-        {/* Confirm Password Input */}
         <View className="my-9 py-3 relative flex-row items-center border border-gray-300 rounded-lg px-4">
           <Entypo
             name="eye-with-line"
@@ -80,14 +146,12 @@ export default function PasswordScreen() {
           />
         </View>
 
-        {/* Error Message */}
         {passwordError && (
           <Text className="text-red-500 text-center mb-4 font-Montserra">
             {passwordError}
           </Text>
         )}
 
-        {/* Next Button */}
         <TouchableOpacity
           className={`p-4 rounded-[10px] items-center ${
             password !== confirmPassword ? "bg-[#4B5320]" : "bg-[#4B5320]"

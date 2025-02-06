@@ -2,17 +2,41 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const WalletScreen = () => {
-   const router = useRouter();
-    const navigation = useNavigation();
-  
-    useEffect(() => {
-      navigation.setOptions({
-        headerShown: false,
-      });
-    }, [navigation]);
+  const router = useRouter();
+  const navigation = useNavigation();
+
+  const [walletBalance, setWalletBalance] = useState(0); // Initialize wallet balance state
   const [selectedTab, setSelectedTab] = useState("expenses");
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+
+    const fetchUserData = async () => {
+      try {
+        const userToken = await AsyncStorage.getItem("user_token");
+        if (userToken) {
+          const response = await fetch(
+            `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
+          );
+          const data = await response.json();
+          if (data.status === "success" && data.data) {
+            setWalletBalance(data.data.wallet); // Set the wallet balance from the API response
+          } else {
+            console.error("Failed to fetch driver details");
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleTopUp = () => {
     console.log("Top up wallet...");
@@ -60,7 +84,9 @@ const WalletScreen = () => {
             <Text className="text-[#4B5320] font-Montserrat">Top up +</Text>
           </TouchableOpacity>
         </View>
-        <Text className="text-4xl font-bold font-Montserrat py-5">$0</Text>
+        <Text className="text-4xl font-bold font-Montserrat py-5">
+          ${walletBalance.toFixed(2)} {/* Display wallet balance */}
+        </Text>
       </View>
 
       <Text className="text-gray-500 text-2xl font-semibold mb-4">

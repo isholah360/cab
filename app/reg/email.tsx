@@ -4,26 +4,36 @@ import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function EmailScreen() {
   const router = useRouter();
-  const navigation = useNavigation()
+  const navigation = useNavigation();
 
-   useEffect(() => {
-      navigation.setOptions({
-        headerShown: false,
-      });
-    }, [navigation]);
+  useEffect(() => {
+    navigation.setOptions({
+      headerShown: false,
+    });
+  }, [navigation]);
 
   const [email, setEmail] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email.trim())) {
       Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
-    router.push("./license"); // Navigate to the next screen
+
+    try {
+      // Save the email to AsyncStorage
+      await AsyncStorage.setItem("email", email.trim());
+
+      // Navigate to the next screen
+      router.push("./gender"); // Navigate to the next screen
+    } catch (error) {
+      console.log("Error saving email:", error);
+    }
   };
 
   return (

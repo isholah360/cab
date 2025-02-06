@@ -20,7 +20,7 @@ const EditVehicleBrandScreen = () => {
   const handleDone = async () => {
     try {
       await AsyncStorage.setItem("vehicleBrand", vehicleBrand);
-      router.push("/addVehicle");
+      router.push("./addVehicle");
     } catch (error) {
       console.error("Error saving vehicle brand:", error);
     }

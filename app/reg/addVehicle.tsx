@@ -50,7 +50,7 @@ const AddVehicleScreen = () => {
   };
 
   const handleNext = () => {
-    router.push("/rides/map");
+    router.push("/rides/docUpload");
   };
 
   return (

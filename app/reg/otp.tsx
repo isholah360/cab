@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function OTPScreen() {
   const navigation = useNavigation();
@@ -16,12 +17,19 @@ export default function OTPScreen() {
 
   const [otp, setOtp] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (otp.length !== 6) {
       Alert.alert("Invalid OTP", "Please enter a valid 6-digit OTP.");
       return;
     }
-    router.push("./userName"); // Navigate to the next screen
+
+    // Store the OTP in AsyncStorage
+    try {
+      await AsyncStorage.setItem("otp", otp);
+      router.push("./userName"); // Navigate to the next screen
+    } catch (error) {
+      console.error("Error saving OTP:", error);
+    }
   };
 
   return (
@@ -63,7 +71,7 @@ export default function OTPScreen() {
             otp.length !== 6 ? "bg-[#4B5320]" : "bg-[#4B5320]"
           } font-Montserra`}
           onPress={handleNext}
-          disabled={otp.length !== 6}
+          disabled={otp.length !== 6} // Disable button if OTP length is not 6
         >
           <Text className="text-white font-bold font-Montserra">Next</Text>
         </TouchableOpacity>

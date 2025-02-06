@@ -41,7 +41,7 @@ const SplashScreen = () => {
 
   const handleAllow = () => {
     setModalVisible(false);
-    router.push('/reg/phone');
+    router.push('/reg/phone');  
   };
 
   const handleDeny = () => {

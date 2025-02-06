@@ -4,17 +4,68 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  Modal,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import CountryPicker from "react-native-country-picker-modal";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Comprehensive global country codes to flags
+const COUNTRY_CODES = {
+  '1': '🇺🇸',    // United States
+  '7': '🇷🇺',    // Russia
+  '20': '🇪🇬',   // Egypt
+  '27': '🇿🇦',   // South Africa
+  '30': '🇬🇷',   // Greece
+  '31': '🇳🇱',   // Netherlands
+  '32': '🇧🇪',   // Belgium
+  '33': '🇫🇷',   // France
+  '34': '🇪🇸',   // Spain
+  '36': '🇭🇺',   // Hungary
+  '39': '🇮🇹',   // Italy
+  '40': '🇷🇴',   // Romania
+  '41': '🇨🇭',   // Switzerland
+  '42': '🇨🇿',   // Czech Republic
+  '43': '🇦🇹',   // Austria
+  '44': '🇬🇧',   // United Kingdom
+  '45': '🇩🇰',   // Denmark
+  '46': '🇸🇪',   // Sweden
+  '47': '🇳🇴',   // Norway
+  '48': '🇵🇱',   // Poland
+  '49': '🇩🇪',   // Germany
+  '51': '🇵🇪',   // Peru
+  '52': '🇲🇽',   // Mexico
+  '53': '🇨🇺',   // Cuba
+  '54': '🇦🇷',   // Argentina
+  '55': '🇧🇷',   // Brazil
+  '56': '🇨🇱',   // Chile
+  '57': '🇨🇴',   // Colombia
+  '58': '🇻🇪',   // Venezuela
+  '60': '🇲🇾',   // Malaysia
+  '61': '🇦🇺',   // Australia
+  '62': '🇮🇩',   // Indonesia
+  '63': '🇵🇭',   // Philippines
+  '64': '🇳🇿',   // New Zealand
+  '65': '🇸🇬',   // Singapore
+  '66': '🇹🇭',   // Thailand
+  '81': '🇯🇵',   // Japan
+  '82': '🇰🇷',   // South Korea
+  '84': '🇻🇳',   // Vietnam
+  '86': '🇨🇳',   // China
+  '90': '🇹🇷',   // Turkey
+  '91': '🇮🇳',   // India
+  '92': '🇵🇰',   // Pakistan
+  '93': '🇦🇫',   // Afghanistan
+  '94': '🇱🇰',   // Sri Lanka
+  '95': '🇲🇲',   // Myanmar
+  '98': '🇮🇷',   // Iran
+  '234': '🇳🇬',  // Nigeria (default)
+};
 
 export default function PhoneNumber() {
-  const navigation = useNavigation();
   const router = useRouter();
+  const navigation = useNavigation();
 
   useEffect(() => {
     navigation.setOptions({
@@ -22,113 +73,120 @@ export default function PhoneNumber() {
     });
   }, [navigation]);
 
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("+234"); // Default to Nigeria
-  const [country, setCountry] = useState({
-    cca2: "NG", // Default country code for Nigeria
-    flag: "🇳🇬", // Default flag for Nigeria
-    callingCode: ["234"], // Default calling code for Nigeria
-  });
-  const [isCountryPickerVisible, setIsCountryPickerVisible] = useState(false);
 
-  const handleNext = () => {
+  const [phoneInput, setPhoneInput] = useState("");  // Holds both country code and phone number
+  const [countryFlag, setCountryFlag] = useState("🇳🇬");  // Default flag (Nigeria)
+
+  console.log(phoneInput);  
+
+  const handlePhoneInputChange = (text) => {
+    const cleanedInput = text.replace(/\D/g, '');  // Clean non-digit characters
+
+    // Extract country code from the cleaned input
+    let matchedCode = '';
+    for (let i = cleanedInput.length; i > 0; i--) {
+      const partialCode = cleanedInput.slice(0, i);
+      if (COUNTRY_CODES[partialCode]) {
+        matchedCode = partialCode;
+        break;
+      }
+    }
+
+    // Update country flag based on the matched country code
+    setCountryFlag(COUNTRY_CODES[matchedCode] || '🌐');
+
+    // Update the phone input with the country code and phone number
+    setPhoneInput('+' + cleanedInput);
+  };
+
+  const handleNext = async () => {
+    const phoneNumber = phoneInput.replace(/\D/g, '');  // Remove all non-digit characters
+  
     const phoneRegex = /^[0-9]{10,15}$/;
     if (!phoneRegex.test(phoneNumber.trim())) {
       Alert.alert("Invalid Phone Number", "Please enter a valid phone number.");
       return;
     }
-    router.push("./otp"); // Navigate to the next screen
+  
+    try {
+      // Prepare the request body as a JSON string
+      const bodyData = JSON.stringify({ phone_number: phoneNumber });
+  
+      // Make POST request to check if phone number exists
+      const response = await fetch("https://billgold.ng/casa/API/driver_user.php?action=driver_user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", 
+        },
+        body: bodyData, 
+      });
+  
+      const data = await response.json();
+      console.log(data);
+  
+      // Check the user_token from the response
+      if (data.next_step === "register") {
+        
+        await AsyncStorage.setItem('userPhoneNumber', phoneNumber)  
+        await AsyncStorage.setItem('user_token', data.user_token)  
+        router.push("./otp");
+      } else {
+        // If user_token exists, navigate to Password screen
+        router.push("./password2");
+      }
+    } catch (error) {
+      console.error("Error in API request:", error);
+      Alert.alert("Network Error", "Please check your internet connection.");
+    }
   };
+  
 
-  const handleSelectCountry = (country) => {
-    setCountry(country);
-    setCountryCode("+" + country.callingCode[0]);
-    setIsCountryPickerVisible(false);
-  };
+  const isButtonDisabled = phoneInput.trim() === "" || !/^[0-9]{10,15}$/.test(phoneInput.replace(/\D/g, ''));
 
   return (
-    <>
-      <SafeAreaView className="flex-1 items-center bg-white">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          className="absolute top-6 left-4 mt-4"
-        >
-          <Ionicons name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-
-        <View className="w-10/12 mt-[5rem]">
-          <Text className="text-center font-bold text-2xl font-Montserra">
-            Enter your phone number
-          </Text>
-          <Text className="text-center text-gray-600 font-bold pt-3 font-Montserra">
-            You need to enter your phone number
-          </Text>
-
-          {/* Country Code and Phone Number Input */}
-          <View className="my-9 py-3 relative">
-            <TextInput
-              className="border border-gray-300 py-4 mt-1 font-bold text-xl bg-white pl-24 font-Montserra"
-              placeholder="Phone Number"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
-            <TouchableOpacity
-              onPress={() => setIsCountryPickerVisible(true)}
-              className="absolute left-4 top-[2.8rem] transform -translate-y-1/2 flex-row items-center"
-            >
-              <Text className="text-2xl mr-2 font-Montserra">
-                {country.flag} {countryCode}
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Login / Register Button */}
-          <TouchableOpacity
-            className={`p-4 rounded-[10px] mt-4 items-center ${
-              phoneNumber.trim() === "" || !/^[0-9]{10,15}$/.test(phoneNumber)
-                ? "bg-[#4B5320]"
-                : "bg-[#4B5320]"
-            }`}
-            onPress={handleNext}
-            disabled={
-              phoneNumber.trim() === "" || !/^[0-9]{10,15}$/.test(phoneNumber)
-            }
-          >
-            <Text className="text-white font-bold font-Montserra">
-              Login / Register
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-
-      {/* Country Picker Modal */}
-      <Modal
-        visible={isCountryPickerVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsCountryPickerVisible(false)}
+    <SafeAreaView className="flex-1 items-center bg-white">
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        className="absolute top-6 left-4 mt-4"
       >
-        <View className="flex-1 justify-end bg-black/50">
-          <View className="bg-white rounded-t-3xl p-6 h-1/2">
-            <CountryPicker
-              withFilter
-              withFlag
-              withCountryNameButton
-              withAlphaFilter
-              onSelect={handleSelectCountry}
-              onClose={() => setIsCountryPickerVisible(false)}
-              countryCode={country.cca2} // Set the default selected country
-            />
-            <TouchableOpacity
-              className="mt-5 p-3 bg-gray-100 rounded-lg items-center"
-              onPress={() => setIsCountryPickerVisible(false)}
-            >
-              <Text className="text-lg font-bold">Close</Text>
-            </TouchableOpacity>
+        <Ionicons name="arrow-back" size={24} color="#000" />
+      </TouchableOpacity>
+
+      <View className="w-10/12 mt-[5rem]">
+        <Text className="text-center font-bold text-2xl font-Montserra">
+          Enter your phone number
+        </Text>
+        <Text className="text-center text-gray-600 font-bold pt-3 font-Montserra">
+          Enter country code and phone number
+        </Text>
+
+        <View className="my-9 py-3 relative">
+          <TextInput
+            className="border-b border-gray-300 py-4 mt-1 font-bold text-2xl bg-white pl-12 ml-3 font-Montserra"
+            placeholder="Phone Number"
+            value={phoneInput}
+            onChangeText={handlePhoneInputChange}
+            keyboardType="phone-pad"
+          />
+          <View 
+            className="absolute top-[2.8rem] transform -translate-y-1/2 flex-row items-center"
+          >
+            <Text className="text-2xl ml-4 text-3xl">{countryFlag}</Text>
           </View>
         </View>
-      </Modal>
-    </>
+
+        <TouchableOpacity
+          className={`p-4 rounded-[10px] mt-4 items-center ${
+            isButtonDisabled ? "bg-[#4B5320]" : "bg-[#4B5320]"
+          }`}
+          onPress={handleNext}
+          disabled={isButtonDisabled}
+        >
+          <Text className="text-white font-bold font-Montserra">
+            Login / Register
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }

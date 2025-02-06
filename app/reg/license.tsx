@@ -3,8 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 
 export default function LicenseScreen() {
   const router = useRouter();
@@ -18,12 +18,19 @@ export default function LicenseScreen() {
 
   const [license, setLicense] = useState("");
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!license.trim()) {
       Alert.alert("Invalid License", "Please enter a valid license number.");
       return;
     }
-    router.push("./birth"); // Navigate to the next screen
+
+    // Store the license number in AsyncStorage
+    try {
+      await AsyncStorage.setItem("licenseNumber", license.trim());
+      router.push("./birth"); // Navigate to the next screen
+    } catch (error) {
+      console.error("Error saving license number:", error);
+    }
   };
 
   return (
@@ -57,7 +64,7 @@ export default function LicenseScreen() {
             !license.trim() ? "bg-[#4B5320]" : "bg-[#4B5320]"
           } font-Montserrat`}
           onPress={handleNext}
-          disabled={!license.trim()}
+          disabled={!license.trim()} // Disable button if input is empty
         >
           <Text className="text-white font-bold font-Montserrat">Next</Text>
         </TouchableOpacity>

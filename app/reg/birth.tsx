@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter, useNavigation } from 'expo-router';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const DateOfBirthScreen = () => {
   const router = useRouter();
@@ -24,8 +25,25 @@ const DateOfBirthScreen = () => {
     setDate(currentDate);
   };
 
-  const handleNextPress = () => {
-    router.push('./password'); // Ensure the path is correct
+  const handleNextPress = async () => {
+    // Date validation (ensure date is not in the future)
+    const today = new Date();
+    if (date > today) {
+      Alert.alert("Invalid Date", "Please select a valid date of birth.");
+      return;
+    }
+
+    if (!date) {
+      Alert.alert("Date", "Please select your Date of Birth.");
+      return;
+    }
+
+    try {
+      await AsyncStorage.setItem("selectDOB", date.toDateString());
+      router.push("./password"); // Navigate to password screen
+    } catch (error) {
+      console.log("Error saving date:", error); // Updated error message
+    }
   };
 
   return (
@@ -51,6 +69,7 @@ const DateOfBirthScreen = () => {
             value={date.toDateString()} 
             editable={false} 
             className="font-Montserrat text-xl" 
+            accessibilityLabel="Date of birth input field"
           />
         </TouchableOpacity>
       </View>
@@ -74,6 +93,7 @@ const DateOfBirthScreen = () => {
       <TouchableOpacity 
         onPress={handleNextPress} 
         className="bg-[#4B5320] px-4 py-4 rounded-lg mt-8"
+        accessibilityLabel="Proceed to the next screen"
       >
         <Text className="text-white text-center font-Montserrat">Next</Text>
       </TouchableOpacity>
