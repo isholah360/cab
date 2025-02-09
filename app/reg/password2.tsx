@@ -9,6 +9,7 @@ export default function PasswordScreen() {
   const navigation = useNavigation();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);  // New state to track password visibility
 
   useEffect(() => {
     navigation.setOptions({
@@ -67,13 +68,22 @@ export default function PasswordScreen() {
 
         {/* Password Input */}
         <View className="my-9 py-3 relative flex-row items-center border border-gray-300 rounded-lg px-4">
-          <Entypo name="eye-with-line" size={24} color="black" className="mr-2" />
+          <TouchableOpacity
+            onPress={() => setIsPasswordVisible(!isPasswordVisible)} // Toggle password visibility
+          >
+            <Entypo 
+              name={isPasswordVisible ? "eye" : "eye-with-line"} // Change icon based on visibility
+              size={24} 
+              color="black" 
+              className="mr-2" 
+            />
+          </TouchableOpacity>
           <TextInput
             className="py-3 font-bold text-xl bg-white flex-1"
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!isPasswordVisible} // Toggle password visibility
           />
         </View>
 

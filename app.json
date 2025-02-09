@@ -31,7 +31,8 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
-        }
+        }, 
+        
       ],
       "expo-font"
     ],
@@ -45,6 +46,7 @@
       "router": {
         "origin": false
       },
+      "GOOGLE_MAPS_API_KEY": "YAIzaSyCvBxUBed29mZ158_39833ylNWBSRq1iKM",
       "eas": {
         "projectId": "2763f1f3-1f6d-4263-b017-c40c84eabb2c"
       }

@@ -131,7 +131,7 @@ export default function PhoneNumber() {
         await AsyncStorage.setItem('user_token', data.user_token)  
         router.push("./otp");
       } else {
-        // If user_token exists, navigate to Password screen
+        await AsyncStorage.setItem('userPhoneNumber', phoneNumber) 
         router.push("./password2");
       }
     } catch (error) {

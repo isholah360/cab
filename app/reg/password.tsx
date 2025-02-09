@@ -19,6 +19,8 @@ export default function PasswordScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const handleNext = async () => {
     if (password !== confirmPassword) {
@@ -32,7 +34,7 @@ export default function PasswordScreen() {
       const lastName = await AsyncStorage.getItem("lastName");
       const gender = await AsyncStorage.getItem("gender");
       const email = await AsyncStorage.getItem("email");
-      const date = await AsyncStorage.getItem("selectDOB"); 
+      const date = await AsyncStorage.getItem("selectDOB");
       const phoneNumber = await AsyncStorage.getItem("userPhoneNumber");
       const license = await AsyncStorage.getItem("licenseNumber");
       const otp = await AsyncStorage.getItem("otp");
@@ -44,7 +46,7 @@ export default function PasswordScreen() {
         user_token: userToken,
         first_name: firstName,
         last_name: lastName,
-        phone_number: phoneNumber,  
+        phone_number: phoneNumber,
         email: email,
         password: password,
         gender: gender,
@@ -66,8 +68,6 @@ export default function PasswordScreen() {
         refered_by: "referral_user_token"
       };
 
-      console.log("Request Data:", requestData);  
-
       const response = await fetch(
         "https://billgold.ng/casa/API/driver_details.php?action=update_driver_details",
         {
@@ -80,14 +80,14 @@ export default function PasswordScreen() {
       );
 
       const result = await response.json();
-      console.log(result)
-      if (result.status === "success") {  
+
+      if (result.status === "success") {
 
         Alert.alert( "updated", "Your profile is updated");
         setTimeout(()=>{
           router.push("./addVehicle");
         }, 3000)
-        
+
       } else {
         Alert.alert("Error", "Failed to update details. Please try again.");
       }
@@ -115,34 +115,42 @@ export default function PasswordScreen() {
         </Text>
 
         <View className="my-9 py-3 relative flex-row items-center border border-gray-300 rounded-lg px-4">
-          <Entypo
-            name="eye-with-line"
-            size={24}
-            color="black"
-            className="mr-2"
-          />
+          <TouchableOpacity
+            onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+          >
+            <Entypo
+              name={isPasswordVisible ? "eye" : "eye-with-line"}
+              size={24}
+              color="black"
+              className="mr-2"
+            />
+          </TouchableOpacity>
           <TextInput
             className="py-3 font-bold text-xl bg-white flex-1 font-Montserra"
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry
+            secureTextEntry={!isPasswordVisible}
           />
         </View>
 
         <View className="my-9 py-3 relative flex-row items-center border border-gray-300 rounded-lg px-4">
-          <Entypo
-            name="eye-with-line"
-            size={24}
-            color="black"
-            className="mr-2"
-          />
+          <TouchableOpacity
+            onPress={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+          >
+            <Entypo
+              name={isConfirmPasswordVisible ? "eye" : "eye-with-line"}
+              size={24}
+              color="black"
+              className="mr-2"
+            />
+          </TouchableOpacity>
           <TextInput
             className="py-3 font-bold text-xl bg-white flex-1 font-Montserra"
             placeholder="Confirm Password"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
-            secureTextEntry
+            secureTextEntry={!isConfirmPasswordVisible}
           />
         </View>
 

@@ -1,0 +1,5 @@
+const CONSTANTS = {
+  GOOGLE_MAPS_API_KEY: "YAIzaSyCvBxUBed29mZ158_39833ylNWBSRq1iKM",
+};
+
+export default CONSTANTS;

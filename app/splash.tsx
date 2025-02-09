@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Image, Text, SafeAreaView, Modal, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Location from 'expo-location'; // Import Location API
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 
 const SplashScreen = () => {
   const router = useRouter();
@@ -39,9 +41,35 @@ const SplashScreen = () => {
     };
   }, []);
 
-  const handleAllow = () => {
+  const handleAllow = async () => {
     setModalVisible(false);
-    router.push('/reg/phone');  
+
+    // Request for location permission
+    const { status } = await Location.requestForegroundPermissionsAsync();
+
+    if (status === 'granted') {
+      // If permission granted, get the GPS location
+      const location = await Location.getCurrentPositionAsync({});
+      console.log("User's location:", location);
+
+      // Save the coordinates in AsyncStorage
+      try {
+        const locationData = JSON.stringify({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+        await AsyncStorage.setItem('userLocation', locationData); // Save to AsyncStorage
+        console.log("Location saved to AsyncStorage");
+
+        // After getting the location, navigate to the next screen
+        router.push('/reg/phone');
+      } catch (error) {
+        console.error("Error saving location to AsyncStorage:", error);
+      }
+    } else {
+      // Handle the case where the permission is denied
+      alert('Location permission denied!');
+    }
   };
 
   const handleDeny = () => {
