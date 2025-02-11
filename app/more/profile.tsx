@@ -201,6 +201,23 @@ export default function ProfileScreen() {
           </View>
           <Ionicons name="chevron-forward" size={27} color="black" />
         </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigateTo("about")} // Navigate to Notifications screen
+          className="flex-row items-center justify-between p-4"
+        >
+          <View className="flex-row items-center">
+            <Ionicons
+              name="notifications"
+              size={27}
+              color="black"
+              className="mr-4"
+            />
+            <Text className="text-gray-800 text-xl font-montserrat">
+              About Us
+            </Text>
+          </View>
+          <Ionicons name="chevron-forward" size={27} color="black" />
+        </TouchableOpacity>
       </View>
     </View>
   );

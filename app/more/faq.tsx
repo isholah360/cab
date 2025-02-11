@@ -21,6 +21,18 @@ const FAQScreen = () => {
     { id: "4", question: "How to change Destination?" },
     { id: "5", question: "What if the cab breaks down during the journey?" },
     { id: "6", question: "How to change language settings of the app?" },
+    { id: "7", question: "Describe your process for cleaning your screen?" },
+    {
+      id: "8",
+      question:
+        "How well can you communicate with people from different cultural backgrounds?",
+    },
+    {
+      id: "9",
+      question:
+        "Do you have a valid driver’s license and vehicle registration?",
+    },
+    { id: "10", question: "Are you comfortable driving long distance?" },
   ];
 
   const handlePress = (id) => {
@@ -36,6 +48,14 @@ const FAQScreen = () => {
       router.push("/faqs/breakdown");
     } else if (id === "6") {
       router.push("/faqs/changeLang");
+    } else if (id === "7") {
+      router.push("/faqs/cleaningScreen");
+    } else if (id === "8") {
+      router.push("/faqs/licenseReg");
+    } else if (id === "9") {
+      router.push("/faqs/communicate");
+    } else if (id === "10") {
+      router.push("/faqs/longDistance");
     }
   };
 

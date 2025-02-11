@@ -31,7 +31,7 @@ const trainingData: TrainingItem[] = [
   {
     id: "1",
     title: "DriveWise: Elevate Your...",
-    path: "/FAQScreen",
+    path: "../training/driveWise",
     description:
       "Welcome to DriveWise, the premier mobile app designed to revolutionize driver training. Whether you're a first-time driver or looking to enhance...",
     image: require("../../assets/wallet.png"), // Default Image
@@ -39,7 +39,7 @@ const trainingData: TrainingItem[] = [
   {
     id: "2",
     title: "DriveSmart Academy: Y...",
-    path: "/FAQScreen",
+    path: "../training/driveSmart",
     description:
       "Welcome to DriveSmart Academy, the revolutionary mobile app designed to equip drivers with essential skills and knowledge for safe and responsible driving...",
     image: require("../../assets/wallet.png"), // Default Image
@@ -47,7 +47,7 @@ const trainingData: TrainingItem[] = [
   {
     id: "3",
     title: "DriveSmart Academy: ...",
-    path: "/FAQScreen",
+    path: "../training/allInOne",
     description:
       "Welcome to DriveSmart Academy, the all-in-one app designed to transform you into a confident and knowledgeable driver. Our innovative approach...",
     image: require("../../assets/wallet.png"), // Default Image
@@ -55,7 +55,7 @@ const trainingData: TrainingItem[] = [
   {
     id: "4",
     title: "Driver Training Pro: Master...",
-    path: "/FAQScreen",
+    path: "../training/trainingPro",
     description:
       "Welcome to Driver Training Pro, your ultimate companion for becoming a skilled and confident driver. Whether you’re a novice or looking to...",
     image: require("../../assets/wallet.png"), // Default Image

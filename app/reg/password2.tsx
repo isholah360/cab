@@ -22,6 +22,7 @@ export default function PasswordScreen() {
   const handleVerifyPassword = async () => {
     try {
       const userToken = await AsyncStorage.getItem("user_token");
+      console.log(userToken)
 
       if (!userToken) {
         Alert.alert("Error", "User token is missing.");

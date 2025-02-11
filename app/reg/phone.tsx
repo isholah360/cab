@@ -73,11 +73,10 @@ export default function PhoneNumber() {
     });
   }, [navigation]);
 
-
   const [phoneInput, setPhoneInput] = useState("");  // Holds both country code and phone number
   const [countryFlag, setCountryFlag] = useState("🇳🇬");  // Default flag (Nigeria)
 
-  console.log(phoneInput);  
+  console.log(phoneInput);
 
   const handlePhoneInputChange = (text) => {
     const cleanedInput = text.replace(/\D/g, '');  // Clean non-digit characters
@@ -101,17 +100,16 @@ export default function PhoneNumber() {
 
   const handleNext = async () => {
     const phoneNumber = phoneInput.replace(/\D/g, '');  // Remove all non-digit characters
-  
+    
     const phoneRegex = /^[0-9]{10,15}$/;
     if (!phoneRegex.test(phoneNumber.trim())) {
       Alert.alert("Invalid Phone Number", "Please enter a valid phone number.");
       return;
     }
-  
+    
     try {
-      // Prepare the request body as a JSON string
       const bodyData = JSON.stringify({ phone_number: phoneNumber });
-  
+
       // Make POST request to check if phone number exists
       const response = await fetch("https://billgold.ng/casa/API/driver_user.php?action=driver_user", {
         method: "POST",
@@ -120,18 +118,30 @@ export default function PhoneNumber() {
         },
         body: bodyData, 
       });
-  
+
       const data = await response.json();
       console.log(data);
-  
-      // Check the user_token from the response
-      if (data.next_step === "register") {
+
+      // Always store the user_token in AsyncStorage regardless of the `next_step`
+      await AsyncStorage.setItem('user_token', data.user_token);
+
+      const userToken = data.user_token; 
+      console.log(userToken);
+
+      // Fetch user details using the user_token
+      const driverDetailsResponse = await fetch(
+        `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
+      );
+      
+      const driverDetails = await driverDetailsResponse.json();
+      console.log(driverDetails); 
+
+      
+      if (driverDetails.data.password === "") {
         
-        await AsyncStorage.setItem('userPhoneNumber', phoneNumber)  
-        await AsyncStorage.setItem('user_token', data.user_token)  
         router.push("./otp");
       } else {
-        await AsyncStorage.setItem('userPhoneNumber', phoneNumber) 
+       
         router.push("./password2");
       }
     } catch (error) {
@@ -139,15 +149,14 @@ export default function PhoneNumber() {
       Alert.alert("Network Error", "Please check your internet connection.");
     }
   };
-  
 
   const isButtonDisabled = phoneInput.trim() === "" || !/^[0-9]{10,15}$/.test(phoneInput.replace(/\D/g, ''));
 
   return (
-    <SafeAreaView className="flex-1 items-center bg-white">
+    <SafeAreaView className="flex-1 items-center bg-white py-5">
       <TouchableOpacity
         onPress={() => navigation.goBack()}
-        className="absolute top-6 left-4 mt-4"
+        className="absolute top-6 left-4 mt-8 pt-5"
       >
         <Ionicons name="arrow-back" size={24} color="#000" />
       </TouchableOpacity>
@@ -176,9 +185,7 @@ export default function PhoneNumber() {
         </View>
 
         <TouchableOpacity
-          className={`p-4 rounded-[10px] mt-4 items-center ${
-            isButtonDisabled ? "bg-[#4B5320]" : "bg-[#4B5320]"
-          }`}
+          className={`p-4 rounded-[10px] mt-4 items-center ${isButtonDisabled ? "bg-[#4B5320]" : "bg-[#4B5320]"}`}
           onPress={handleNext}
           disabled={isButtonDisabled}
         >
