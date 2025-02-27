@@ -3,19 +3,44 @@ import React, { useEffect, useState } from "react";
 import { useNavigation, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function OTPScreen() {
   const navigation = useNavigation();
   const router = useRouter();
+  const [otp, setOtp] = useState("");
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
-  }, [navigation]);
+    const fetchDriverDetails = async () => {
+      try {
+        const userToken = await AsyncStorage.getItem("user_token");
+        if (!userToken) {
+          Alert.alert("Error", "User token is missing.");
+          return;
+        }
 
-  const [otp, setOtp] = useState("");
+        const response = await fetch(
+          `https://casa-nbjx.onrender.com/api/drivers/profile/${userToken}`
+        );
+        const data = await response.json();
+        console.log(data._id)
+
+        if (data._id === userToken) {
+          await AsyncStorage.setItem("driver_id", String(data._id));
+        } else {
+          Alert.alert("Error", "Failed to fetch driver details.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        Alert.alert("Error", "Something went wrong. Please try again.");
+      }
+    };
+
+    fetchDriverDetails();
+  }, [navigation]);
 
   const handleNext = async () => {
     if (otp.length !== 6) {
@@ -23,7 +48,7 @@ export default function OTPScreen() {
       return;
     }
 
-    // Store the OTP in AsyncStorage
+   
     try {
       await AsyncStorage.setItem("otp", otp);
       router.push("./userName"); // Navigate to the next screen
@@ -65,7 +90,7 @@ export default function OTPScreen() {
             maxLength={6}
           />
         </View>
-        {/* Next Button */}
+       
         <TouchableOpacity
           className={`p-4 rounded-[10px] mt-4 items-center ${
             otp.length !== 6 ? "bg-[#4B5320]" : "bg-[#4B5320]"

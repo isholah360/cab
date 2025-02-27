@@ -9,6 +9,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const navigation = useNavigation();
     const [firstName, setFirstName] = useState("");
+    const [profilePicture, setProfilePicture] = useState("");
     const [lastName, setLastName] = useState("");
      const [email, setEmail] = useState("");
 
@@ -22,18 +23,25 @@ export default function ProfileScreen() {
     });
 
     const fetchUserData = async () => {
+
+      // https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}
       try {
         const userToken = await AsyncStorage.getItem("user_token");
+        const userDriver = await AsyncStorage.getItem("drivers_id");
+        console.log(userDriver)
         if (userToken) {
           const response = await fetch(
-            `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
+             `https://casa-nbjx.onrender.com/api/drivers/profile/${userToken}`
           );
           const data = await response.json();
-          if (data.status === "success" && data.data) {
-            const { first_name, last_name, email,} = data.data;
+          console.log(data)
+          if (data) {
+            const { first_name, last_name, email, profile_picture } = data
             setFirstName(first_name);
             setLastName(last_name);
             setEmail(email);
+            setProfilePicture(profile_picture);
+            console.log(profilePicture)
   
           } else {
             console.error("Failed to fetch driver details");
@@ -63,8 +71,8 @@ export default function ProfileScreen() {
       {/* Profile Section */}
       <View className="items-center mt-10 pt-6">
         <Image
-          source={{ uri: "https://via.placeholder.com/150" }} // Replace with actual image URL or local image path
-          className="w-24 h-24 rounded-full border-2 border-gray-300"
+          source={{ uri: `${profilePicture}` }} // Replace with actual image URL or local image path
+          className="w-24 h-24 rounded-full border-2 border-gray-300 object-cover"
         />
         <Text className="text-xl font-bold mt-2 text-black font-montserrat">
           {firstName} {lastName}

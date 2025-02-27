@@ -1,8 +1,9 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useNavigation, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import * as Notifications from "expo-notifications"; // Add this import
 
 const NotificationScreen = () => {
   const router = useRouter();
@@ -12,7 +13,49 @@ const NotificationScreen = () => {
     navigation.setOptions({
       headerShown: false,
     });
+
+   
+    registerForPushNotificationsAsync();
   }, [navigation]);
+
+ 
+  const registerForPushNotificationsAsync = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      alert("Failed to get push notification permissions!");
+      return;
+    }
+    const token = await Notifications.getExpoPushTokenAsync();
+    console.log("Push Token:", token);
+  };
+
+
+  const sendTestPushNotification = async () => {
+    const pushToken = await AsyncStorage.getItem("push_token");
+    if (pushToken) {
+      const message = {
+        to: pushToken,
+        sound: "default",
+        title: "Test Notification",
+        body: "This is a test push notification!",
+        data: { someData: "goes here" },
+      };
+
+      try {
+        await Notifications.scheduleNotificationAsync({
+          content: message,
+          trigger: null, // Send immediately
+        });
+        Alert.alert("Success", "Test notification sent!");
+      } catch (error) {
+        console.error("Error sending push notification:", error);
+        Alert.alert("Error", "Failed to send test notification.");
+      }
+    } else {
+      console.log("Push token not available");
+    }
+  };
+
   const notifications = [
     {
       title: "Vehicle Maintenance Reminder",
@@ -51,6 +94,14 @@ const NotificationScreen = () => {
         <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
 
+     
+      <TouchableOpacity
+        onPress={sendTestPushNotification} // Trigger sending test notification
+        className="absolute top-16 right-10 p-3 bg-blue-500 rounded-full"
+      >
+        <Text className="text-white font-bold">Test Notification</Text>
+      </TouchableOpacity>
+
       {/* Title */}
       <Text className="text-2xl font-bold text-center mb-8 mt-8 pt-5">Notification</Text>
 
@@ -65,7 +116,7 @@ const NotificationScreen = () => {
                 color="white"
               />
             </View>
-            {/* Replace with actual icon */}
+           
             <View>
               <Text className="text-lg font-bold">{notification.title}</Text>
               <Text className="text-gray-600">{notification.message}</Text>

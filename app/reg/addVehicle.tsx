@@ -22,7 +22,7 @@ const AddVehicleScreen = () => {
   const [vehicleType, setVehicleType] = useState("");
   const [vehicleNumber, setVehicleNumber] = useState("");
 
-  // Load saved values when component mounts
+ 
   useEffect(() => {
     const loadVehicleData = async () => {
       try {

@@ -72,30 +72,29 @@ export default function MapScreen() {
 
     fetchLocation(); // Trigger fetching location
 
-  }, []); // Empty dependency array to only run once on mount
+  }, []); 
 
-  // Function to toggle online status and make the API call
+
   const toggleOnlineStatus = async () => {
     if (!userToken) {
       console.error("User token is not available");
-      return; // Exit if user_token is not available
+      return;
     }
 
     const newOnlineStatus = !isOnline ? "online" : "offline"; // Toggle status
-    setIsOnline(!isOnline); // Update the local state
+    setIsOnline(!isOnline); 
 
-    // Prepare request data for the API
+   
     const requestData = {
-      user_token: userToken,
-      online_status: newOnlineStatus, // Set the online status in the payload
+      online_status: newOnlineStatus, 
     };
 
     try {
-      // Send a POST request to update the online status in the database
+     
       const response = await fetch(
-        "https://billgold.ng/casa/API/driver_details.php?action=update_driver_details",
+        `https://casa-nbjx.onrender.com/api/drivers/profile/${userToken}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
@@ -104,7 +103,7 @@ export default function MapScreen() {
       );
 
       const data = await response.json(); 
-      if (data.status === 'success') {  
+      if (data) {  
         console.log("Online status updated successfully");
       } else {
         console.error("Failed to update online status");
@@ -117,7 +116,8 @@ export default function MapScreen() {
   const handleIconPress = (iconName) => {
     setActiveIconz(iconName);
     if (iconName === "home") {
-      router.push("./dashboard");
+      router.back();
+      // router.push("./docUpload");
     } else if (iconName === "book") {
       router.push("./myRide");
     } else if (iconName === "settings") {
@@ -135,7 +135,7 @@ export default function MapScreen() {
           color={!isOnline ? "green" : "gray"}
         />
         <TouchableOpacity
-          onPress={toggleOnlineStatus} // Use the toggleOnlineStatus function
+          onPress={toggleOnlineStatus} 
           className="bg-gray-300 p-2 rounded-full"
         >
           <Ionicons
@@ -201,6 +201,20 @@ export default function MapScreen() {
           </MapView>
         )
       )}
+
+      {/* Today's Bookings and Earnings */}
+      <View style={styles.statsContainer}>
+        <View style={styles.statItem}>
+          <Ionicons name="bookmark-outline" size={24} color="white" />
+          <Text style={styles.statValue} className="font-Montserrat-bold text-2xl pt-2">0</Text>
+          <Text style={styles.statLabel} className="font-Montserrat-bold text-xl">Today Bookings</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Ionicons name="cash-outline" size={24} color="white" />
+          <Text style={styles.statValue} className="font-Montserrat-bold text-2xl pt-2">$0.00</Text>
+          <Text style={styles.statLabel} className="font-Montserrat-bold text-xl">Today Earnings</Text>
+        </View>
+      </View>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNavContainer}>
@@ -275,6 +289,30 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  statsContainer: {
+    position: 'absolute',
+    bottom: 85,
+    left: '5%',
+    right: 0,
+    backgroundColor: '#4B5320',
+    padding: 25,
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width:"90%"
+  },
+  statItem: {
+    alignItems: 'center',
+  },
+  statValue: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    color: 'white',
+    marginTop: 5,
   },
   bottomNavContainer: {
     position: "absolute",

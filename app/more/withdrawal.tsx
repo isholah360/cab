@@ -19,11 +19,12 @@ const WithdrawalScreen = () => {
         const userToken = await AsyncStorage.getItem("user_token");
         if (userToken) {
           const response = await fetch(
-            `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
+            // `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
+            `https://casa-nbjx.onrender.com/api/drivers/profile/${userToken}`
           );
           const data = await response.json();
-          if (data.status === "success" && data.data) {
-            setWalletBalance(data.data.wallet); // Set the wallet balance from the API response
+          if (data) {
+            setWalletBalance(data.wallet); // Set the wallet balance from the API response
           } else {
             console.error("Failed to fetch driver details");
           }

@@ -4,55 +4,93 @@ import { router, useNavigation } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Entypo from "@expo/vector-icons/Entypo";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Notifications from "expo-notifications"; // Add this import
 
 export default function PasswordScreen() {
   const navigation = useNavigation();
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);  // New state to track password visibility
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: false,
     });
+
+   
+    registerForPushNotificationsAsync();
+
   }, [navigation]);
 
-  console.log(password);  
+  
+  const registerForPushNotificationsAsync = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    if (status !== "granted") {
+      alert("Failed to get push notification permissions!");
+      return;
+    }
+    const token = await Notifications.getExpoPushTokenAsync();
+    await AsyncStorage.setItem("push_token", token.data);  // Save the token in AsyncStorage
+  };
+
+  const sendPushNotification = async () => {
+    const pushToken = await AsyncStorage.getItem("push_token");
+    if (pushToken) {
+      const message = {
+        to: pushToken,
+        sound: "default",
+        title: "Login Success",
+        body: "You have successfully logged in!",
+        data: { someData: "goes here" },
+      };
+
+      await Notifications.scheduleNotificationAsync({
+        content: message,
+        trigger: null, // Send immediately
+      });
+    } else {
+      console.log("Push token not available");
+    }
+  };
 
   const handleVerifyPassword = async () => {
     try {
-      const userToken = await AsyncStorage.getItem("user_token");
-      console.log(userToken)
-
-      if (!userToken) {
-        Alert.alert("Error", "User token is missing.");
+      const phoneNumber = await AsyncStorage.getItem('phone'); // Retrieve phone number from AsyncStorage
+      if (!phoneNumber) {
+        Alert.alert("Error", "Phone number is missing.");
         return;
       }
-
-      const response = await fetch(
-        `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
-      );
+  
+      const requestData = {
+        phone_number: phoneNumber,  
+        password: password,        
+      };
+  
+      // Make the POST request
+      const response = await fetch("https://casa-nbjx.onrender.com/api/drivers/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
+  
       const data = await response.json();
-
-      console.log(data);  
-
-      if (data.status === "success" && data.data) {
-        const storedPassword = data.data.password;
-
-        if (password === storedPassword) {
-          router.push("../rides/map"); // Replace "DashboardScreen" with actual screen name
-        } else {
-          // Password is incorrect
-          Alert.alert("Error", "Incorrect password. Please try again.");
-        }
+      console.log(data);
+  
+      if (data.message === "Login successful") {
+        router.push("../rides/map");  
+        sendPushNotification();       
       } else {
-        Alert.alert("Error", "Failed to fetch user details.");
+        Alert.alert("Error", "Login failed. Please check your credentials and try again.");
       }
     } catch (error) {
       console.error("Error:", error);
       Alert.alert("Error", "Something went wrong. Please try again.");
     }
   };
+  
+  
 
   return (
     <View className="flex-1 items-center bg-white p-6">
@@ -84,7 +122,7 @@ export default function PasswordScreen() {
             placeholder="Password"
             value={password}
             onChangeText={setPassword}
-            secureTextEntry={!isPasswordVisible} // Toggle password visibility
+            secureTextEntry={!isPasswordVisible} 
           />
         </View>
 

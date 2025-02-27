@@ -4,7 +4,7 @@
     "slug": "cab",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/casalogo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -33,6 +33,21 @@
           "backgroundColor": "#ffffff"
         }, 
         
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you share them with your friends.",
+          "cameraPermission": "The app needs access to your camera"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/casalogo.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/notification-sound.wav"]
+        }
       ],
       "expo-font"
     ],

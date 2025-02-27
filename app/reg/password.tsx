@@ -46,42 +46,42 @@ export default function PasswordScreen() {
         user_token: userToken,
         first_name: firstName,
         last_name: lastName,
-        phone_number: phoneNumber,
         email: email,
-        password: password,
+        password_hash: password,
         gender: gender,
-        profile_picture: "http://example.com/profile.jpg",
+        // profile_picture: "http://example.com/profile.jpg",
         date_of_birth: formattedDob,
         address: "123 Street Name, City, Country",
         licence_number: license,
-        id_proof: "http://example.com/id_proof.jpg",
-        id_proof_status: "verified",
-        rejected_reason: "Some rejection reason",
+        // id_proof: "http://example.com/id_proof.jpg",
+        // id_proof_status: "verified",
+        // rejected_reason: "Some rejection reason",
         online_status: "online",
         wallet: 200.50,
-        zone: "Zone A",
+        // zone: "Zone A",
         overall_ratings: 4.7,
-        no_of_ratings: 150,
+        no_of_ratings: 170,
         otp: otp,
         status: "active",
         referral_code: "DRIVER123",
         refered_by: "referral_user_token"
       };
-
+// "https://billgold.ng/casa/API/driver_details.php?action=update_driver_details"
       const response = await fetch(
-        "https://billgold.ng/casa/API/driver_details.php?action=update_driver_details",
+        `https://casa-nbjx.onrender.com/api/drivers/profile/${userToken}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestData),
         }
       );
-
+      
       const result = await response.json();
+      console.log(result._id)
 
-      if (result.status === "success") {
+      if (result.driver._id === userToken ) {
 
         Alert.alert( "updated", "Your profile is updated");
         setTimeout(()=>{

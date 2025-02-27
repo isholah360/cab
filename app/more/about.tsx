@@ -1,6 +1,7 @@
 import { useNavigation, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from 'react-native-vector-icons/Ionicons';  // Import Ionicons for icons
 
 
@@ -66,8 +67,15 @@ const AboutUsScreen = () => {
           </Text>
         </View>
 
+        <View className="flex-row items-center mb-2">
+          <FontAwesome5 name="globe" size={24} color="black" className="mr-2" />  {/* Address icon */}
+          <Text className="text-lg mt-2 underline">
+            https://menpanitech.com
+          </Text>
+        </View>
+
         {/* Website */}
-        <Text className="text-lg mt-2 underline">https://menpanitech.com</Text>
+        {/* <Text className="text-lg mt-2 underline">https://menpanitech.com</Text> */}
       </View>
     </View>
   );

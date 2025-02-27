@@ -26,10 +26,10 @@ export default function EmailScreen() {
     }
 
     try {
-      // Save the email to AsyncStorage
+     
       await AsyncStorage.setItem("email", email.trim());
 
-      // Navigate to the next screen
+     
       router.push("./gender"); // Navigate to the next screen
     } catch (error) {
       console.log("Error saving email:", error);

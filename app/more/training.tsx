@@ -55,7 +55,7 @@ const trainingData: TrainingItem[] = [
   {
     id: "4",
     title: "Driver Training Pro: Master...",
-    path: "../training/trainingPro",
+    path: "../training/trainigPro",
     description:
       "Welcome to Driver Training Pro, your ultimate companion for becoming a skilled and confident driver. Whether you’re a novice or looking to...",
     image: require("../../assets/wallet.png"), // Default Image

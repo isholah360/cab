@@ -14,7 +14,7 @@ const LicenseRegistrationScreen = () => {
         });
       }, [navigation]);
   return (
-    <View className="flex-1 bg-gray-100 p-4">
+    <View className="flex-1 bg-gray-100 p-4 py-10">
       {/* Back Arrow */}
       <TouchableOpacity onPress={() => navigation.goBack()} className="mb-8">
         <Ionicons name="arrow-back" size={28} color="#000" />

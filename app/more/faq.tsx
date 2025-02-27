@@ -60,7 +60,7 @@ const FAQScreen = () => {
   };
 
   return (
-    <View className="flex-1 bg-white p-4 px-8 mr-1">
+    <View className="flex-1 bg-white p-5 pl-6 pr-11 mr-2">
       <TouchableOpacity
         onPress={() => router.back()}
         className="absolute top-6 left-4 mt-4"
@@ -82,7 +82,7 @@ const FAQScreen = () => {
               size={24}
               color="black"
             />
-            <Text className="ml-3 text-2xl font-Montserrat">
+            <Text className="ml-2 text-[1.35rem] font-Montserrat">
               {item.question}
             </Text>
           </TouchableOpacity>

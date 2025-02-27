@@ -71,15 +71,23 @@ export default function PhoneNumber() {
     navigation.setOptions({
       headerShown: false,
     });
+
+    // Persist phone input when the app refreshes (fetch from AsyncStorage)
+    const fetchStoredPhoneInput = async () => {
+      const storedPhoneNumber = await AsyncStorage.getItem("phone");
+      if (storedPhoneNumber) {
+        setPhoneInput(storedPhoneNumber); // Set it with the stored value
+      }
+    };
+
+    fetchStoredPhoneInput();
   }, [navigation]);
 
-  const [phoneInput, setPhoneInput] = useState("");  // Holds both country code and phone number
-  const [countryFlag, setCountryFlag] = useState("🇳🇬");  // Default flag (Nigeria)
-
-  console.log(phoneInput);
+  const [phoneInput, setPhoneInput] = useState("");  
+  const [countryFlag, setCountryFlag] = useState("🇳🇬");
 
   const handlePhoneInputChange = (text) => {
-    const cleanedInput = text.replace(/\D/g, '');  // Clean non-digit characters
+    const cleanedInput = text.replace(/\D/g, ''); 
 
     // Extract country code from the cleaned input
     let matchedCode = '';
@@ -91,57 +99,54 @@ export default function PhoneNumber() {
       }
     }
 
-    // Update country flag based on the matched country code
     setCountryFlag(COUNTRY_CODES[matchedCode] || '🌐');
 
-    // Update the phone input with the country code and phone number
+    // Always set phone input with + and cleaned input
     setPhoneInput('+' + cleanedInput);
   };
 
+  // console.log(phoneInput)
+
   const handleNext = async () => {
-    const phoneNumber = phoneInput.replace(/\D/g, '');  // Remove all non-digit characters
-    
-    const phoneRegex = /^[0-9]{10,15}$/;
-    if (!phoneRegex.test(phoneNumber.trim())) {
-      Alert.alert("Invalid Phone Number", "Please enter a valid phone number.");
-      return;
+    const phoneNumber = phoneInput.trim();
+
+    console.log(phoneNumber); // Log the phone number with + symbol
+
+    const phoneRegex = /^\+?[0-9]{10,15}$/; // Accepts numbers with or without a leading '+'
+    if (!phoneRegex.test(phoneNumber)) {
+        Alert.alert("Invalid Phone Number", "Please enter a valid phone number.");
+        return;
     }
     
     try {
-      const bodyData = JSON.stringify({ phone_number: phoneNumber });
-
-      // Make POST request to check if phone number exists
-      const response = await fetch("https://billgold.ng/casa/API/driver_user.php?action=driver_user", {
+      // POST request to register or check if phone number exists
+      const response = await fetch("https://casa-nbjx.onrender.com/api/drivers/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json", 
         },
-        body: bodyData, 
+        body: JSON.stringify({ phone_number: phoneNumber }),
       });
 
       const data = await response.json();
-      console.log(data);
 
-      // Always store the user_token in AsyncStorage regardless of the `next_step`
-      await AsyncStorage.setItem('user_token', data.user_token);
-
-      const userToken = data.user_token; 
+      console.log(data)
+    
+      const userToken = data.driver_id; 
       console.log(userToken);
 
-      // Fetch user details using the user_token
       const driverDetailsResponse = await fetch(
-        `https://billgold.ng/casa/API/driver_get_details.php?action=get_driver_details&user_token=${userToken}`
+        `https://casa-nbjx.onrender.com/api/drivers/profile/${userToken}`
       );
       
       const driverDetails = await driverDetailsResponse.json();
       console.log(driverDetails); 
 
-      
-      if (driverDetails.data.password === "") {
-        
+      if (data.message === "Driver registered successfully" || driverDetails.password === "") {
+        await AsyncStorage.setItem('user_token', data.driver_id);
         router.push("./otp");
-      } else {
-       
+      } else if (data.message === "Phone number already registered") {
+        await AsyncStorage.setItem('user_token', data.id);
         router.push("./password2");
       }
     } catch (error) {
